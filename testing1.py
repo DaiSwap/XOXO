@@ -1,4 +1,4 @@
-import random
+import math
 
 def print_board(board):
     for row in board:
@@ -29,9 +29,42 @@ def get_available_moves(board):
 def make_move(board, move, player):
     board[move[0]][move[1]] = player
 
-def get_ai_move(board):
-    available_moves = get_available_moves(board)
-    return random.choice(available_moves)
+def minimax(board, depth, is_maximizing):
+    if check_winner(board, "O"):
+        return 1
+    elif check_winner(board, "X"):
+        return -1
+    elif not get_available_moves(board):
+        return 0
+
+    if is_maximizing:
+        best_score = -math.inf
+        for move in get_available_moves(board):
+            make_move(board, move, "O")
+            score = minimax(board, depth + 1, False)
+            make_move(board, move, " ")
+            best_score = max(score, best_score)
+        return best_score
+    else:
+        best_score = math.inf
+        for move in get_available_moves(board):
+            make_move(board, move, "X")
+            score = minimax(board, depth + 1, True)
+            make_move(board, move, " ")
+            best_score = min(score, best_score)
+        return best_score
+
+def get_best_move(board):
+    best_score = -math.inf
+    best_move = None
+    for move in get_available_moves(board):
+        make_move(board, move, "O")
+        score = minimax(board, 0, False)
+        make_move(board, move, " ")
+        if score > best_score:
+            best_score = score
+            best_move = move
+    return best_move
 
 def main():
     board = [[" " for _ in range(3)] for _ in range(3)]
@@ -48,7 +81,7 @@ def main():
             make_move(board, (row, col), current_player)
         else:
             print("AI is making a move...")
-            move = get_ai_move(board)
+            move = get_best_move(board)
             make_move(board, move, current_player)
 
         if check_winner(board, current_player):
