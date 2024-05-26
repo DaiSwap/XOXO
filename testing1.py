@@ -3,7 +3,7 @@ import math
 def print_board(board):
     for row in board:
         print(" | ".join(row))
-        print("-" * 5)
+        print("-" * 10)
 
 def check_winner(board, player):
     win_conditions = [
@@ -73,8 +73,8 @@ def main():
     while True:
         print_board(board)
         if current_player == "X":
-            row = int(input("Enter the row (0, 1, 2): "))
-            col = int(input("Enter the column (0, 1, 2): "))
+            row = int(input("Enter the row (1, 2, 3): "))
+            col = int(input("Enter the column (1, 2, 3): "))
             if (row, col) not in get_available_moves(board):
                 print("Invalid move. Try again.")
                 continue
