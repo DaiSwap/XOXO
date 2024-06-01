@@ -1,26 +1,23 @@
 import math
 
-# Function to print the current board state
 def print_board(board):
     for row in board:
         print(" | ".join(row))
         print("-" * 5)
 
-# Function to check if a player has won
 def check_winner(board, player):
     win_conditions = [
-        [board[0][0], board[0][1], board[0][2]],  # Top row
-        [board[1][0], board[1][1], board[1][2]],  # Middle row
-        [board[2][0], board[2][1], board[2][2]],  # Bottom row
-        [board[0][0], board[1][0], board[2][0]],  # Left column
-        [board[0][1], board[1][1], board[2][1]],  # Middle column
-        [board[0][2], board[1][2], board[2][2]],  # Right column
+        [board[0][0], board[0][1], board[0][2]],  
+        [board[1][0], board[1][1], board[1][2]],  
+        [board[2][0], board[2][1], board[2][2]],  
+        [board[0][0], board[1][0], board[2][0]],  
+        [board[0][1], board[1][1], board[2][1]],  
+        [board[0][2], board[1][2], board[2][2]],  
         [board[0][0], board[1][1], board[2][2]],  # Diagonal from top-left
         [board[2][0], board[1][1], board[0][2]],  # Diagonal from bottom-left
     ]
     return [player, player, player] in win_conditions
 
-# Function to get a list of all available moves (empty spots on the board)
 def get_available_moves(board):
     moves = []
     for i in range(3):
@@ -29,17 +26,15 @@ def get_available_moves(board):
                 moves.append((i, j))
     return moves
 
-# Function to make a move on the board
 def make_move(board, move, player):
     board[move[0]][move[1]] = player
 
-# Function implementing the Alpha-Beta Pruning algorithm
 def alpha_beta_pruning(board, depth, alpha, beta, is_maximizing):
-    if check_winner(board, "O"):  # If AI wins
+    if check_winner(board, "O"):  
         return 1
-    elif check_winner(board, "X"):  # If player wins
+    elif check_winner(board, "X"):  
         return -1
-    elif not get_available_moves(board):  # If it's a tie
+    elif not get_available_moves(board):  
         return 0
 
     if is_maximizing:
@@ -65,13 +60,40 @@ def alpha_beta_pruning(board, depth, alpha, beta, is_maximizing):
                 break
         return min_eval
 
-# Function to determine the best move for the AI
-def get_best_move(board):
+def minimax(board, depth, is_maximizing):
+    if check_winner(board, "O"):  
+        return 1
+    elif check_winner(board, "X"):  
+        return -1
+    elif not get_available_moves(board):  
+        return 0
+
+    if is_maximizing:
+        max_eval = -math.inf
+        for move in get_available_moves(board):
+            make_move(board, move, "O")
+            eval = minimax(board, depth + 1, False)
+            make_move(board, move, " ")
+            max_eval = max(max_eval, eval)
+        return max_eval
+    else:
+        min_eval = math.inf
+        for move in get_available_moves(board):
+            make_move(board, move, "X")
+            eval = minimax(board, depth + 1, True)
+            make_move(board, move, " ")
+            min_eval = min(min_eval, eval)
+        return min_eval
+
+def get_best_move(board, use_alpha_beta=True):
     best_score = -math.inf
     best_move = None
     for move in get_available_moves(board):
         make_move(board, move, "O")
-        score = alpha_beta_pruning(board, 0, -math.inf, math.inf, False)
+        if use_alpha_beta:
+            score = alpha_beta_pruning(board, 0, -math.inf, math.inf, False)
+        else:
+            score = minimax(board, 0, False)
         make_move(board, move, " ")
         if score > best_score:
             best_score = score
@@ -83,6 +105,9 @@ def main():
     # Initialize an empty board
     board = [[" " for _ in range(3)] for _ in range(3)]
     current_player = "X"
+
+    # Choose the algorithm to use
+    use_alpha_beta = input("Use Alpha-Beta Pruning? (yes/no): ").strip().lower() == "yes"
 
     while True:
         print_board(board)
@@ -97,9 +122,10 @@ def main():
         else:
             # AI's move
             print("AI is making a move...")
-            move = get_best_move(board)
+            move = get_best_move(board, use_alpha_beta)
             make_move(board, move, current_player)
-
+     
+ 
         # Check for a winner
         if check_winner(board, current_player):
             print_board(board)
